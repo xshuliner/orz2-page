@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Serif SC", serif;
+  background-color: #f7f5f0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.font-serif-sc {
+  font-family: "Noto Serif SC", serif;
+}
+
+.font-mono-geist {
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.writing-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+}
