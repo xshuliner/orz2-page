@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -47,7 +47,7 @@ body {
 }
 
 .font-display-zh {
-  font-family: "ZCOOL XiaoWei", "Noto Serif SC", serif;
+  font-family: "Ma Shan Zheng", "Noto Serif SC", serif;
 }
 
 .font-brush {
@@ -86,6 +86,14 @@ body {
   right: 12px;
   border-bottom-width: 2px;
   border-right-width: 2px;
+}
+
+/* 当世高手卡片悬停 */
+.card-hover:hover {
+  border-color: var(--orz-ink) !important;
+  background-color: rgba(255, 255, 255, 1) !important;
+  box-shadow: var(--orz-shadow-lg) !important;
+  transform: translateY(-2px);
 }
 
 /* 选中样式 */
