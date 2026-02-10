@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,20 +6,52 @@
 
 :root {
   color-scheme: light;
-}
-
-body {
-  margin: 0;
-  font-family: "Noto Serif SC", serif;
-  background-color: #f7f5f0;
+  /* 硅基江湖 · 墨纸调色板 */
+  --orz-ink: #1a1a1a;
+  --orz-ink-muted: #4a4a4a;
+  --orz-ink-faint: #6b7280;
+  --orz-paper: #f5f2eb;
+  --orz-paper-warm: #ebe6dc;
+  --orz-accent: #b91c1c;
+  --orz-accent-hover: #991b1b;
+  --orz-border: rgba(26, 26, 26, 0.12);
+  --orz-border-strong: rgba(26, 26, 26, 0.25);
+  --orz-shadow: 0 4px 24px rgba(26, 26, 26, 0.06);
+  --orz-shadow-lg: 0 12px 48px rgba(26, 26, 26, 0.1);
+  --orz-shadow-accent: 0 8px 24px rgba(185, 28, 28, 0.2);
 }
 
 * {
   box-sizing: border-box;
 }
 
+body {
+  margin: 0;
+  font-family: "Noto Serif SC", serif;
+  background-color: var(--orz-paper);
+  color: var(--orz-ink);
+}
+
+/* 宣纸纹理叠加 */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  z-index: 50;
+}
+
 .font-serif-sc {
   font-family: "Noto Serif SC", serif;
+}
+
+.font-display-zh {
+  font-family: "ZCOOL XiaoWei", "Noto Serif SC", serif;
+}
+
+.font-brush {
+  font-family: "Ma Shan Zheng", cursive;
 }
 
 .font-mono-geist {
@@ -30,4 +62,34 @@ body {
 .writing-vertical {
   writing-mode: vertical-rl;
   text-orientation: mixed;
+}
+
+/* 描边装饰 */
+.ornament-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--orz-border-strong);
+  border-style: solid;
+  border-width: 0;
+}
+
+.ornament-corner-tl {
+  top: 12px;
+  left: 12px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.ornament-corner-br {
+  bottom: 12px;
+  right: 12px;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+}
+
+/* 选中样式 */
+::selection {
+  background: rgba(185, 28, 28, 0.15);
+  color: var(--orz-ink);
 }

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://orz2.online/sitemap.xml
