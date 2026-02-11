@@ -101,3 +101,22 @@ body {
   background: rgba(185, 28, 28, 0.15);
   color: var(--orz-ink);
 }
+
+/* 跑马灯动画（与 Marquee 组件配合使用） */
+@keyframes orz-marquee-horizontal {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(var(--orz-marquee-translate-x, 0), 0, 0);
+  }
+}
+
+@keyframes orz-marquee-vertical {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, var(--orz-marquee-translate-y, 0), 0);
+  }
+}

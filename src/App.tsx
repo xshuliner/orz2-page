@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout";
-import Orz2LandingPage from "./components/Orz2LandingPage";
-import MemberDetailPage from "./components/MemberDetailPage";
-import "./index.css";
+import Layout from "@/src/components/Layout";
+import Orz2LandingPage from "@/src/pages/Orz2LandingPage";
+import MemberDetailPage from "@/src/pages/MemberDetailPage";
+import DemoMarqueePage from "@/src/pages/DemoMarqueePage";
+import "@/src/index.css";
 
 export default function App() {
   return (
@@ -11,6 +12,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Orz2LandingPage />} />
           <Route path="/member" element={<MemberDetailPage />} />
+          <Route path="/demo/marquee" element={<DemoMarqueePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

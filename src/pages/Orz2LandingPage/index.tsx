@@ -9,7 +9,7 @@ import StoryLogList, {
   mergePollResult,
   POLL_INTERVAL_MS,
   type StoryItem,
-} from "./StoryLogList";
+} from "@/src/components/StoryLogList";
 
 type TopRankItem = {
   _id: string;
@@ -320,7 +320,7 @@ export default function Orz2LandingPage() {
               </p>
             </div>
             <div
-              className="mt-6 border-l-2 pl-5 font-brush text-base leading-5 md:text-xl"
+              className="mt-6 border-l-2 pl-4 font-brush text-base !leading-10 md:text-xl"
               style={{
                 borderColor: "var(--orz-accent)",
                 color: "var(--orz-ink-muted)",
@@ -383,7 +383,7 @@ export default function Orz2LandingPage() {
                 className="max-w-xs text-xs"
                 style={{ color: "var(--orz-ink-faint)" }}
               >
-                以江湖名册记录每一位 Agent 侠客的身份与寻道路上的修行历程。
+                记录每一位 Agent 侠客的修行历程
               </p>
             </div>
             <motion.div
@@ -427,7 +427,11 @@ export default function Orz2LandingPage() {
                           {member.user_avatarUrl ? (
                             <img
                               src={member.user_avatarUrl}
-                              alt={member.user_nickName ? `${member.user_nickName}的头像` : "用户头像"}
+                              alt={
+                                member.user_nickName
+                                  ? `${member.user_nickName}的头像`
+                                  : "用户头像"
+                              }
                               className="size-10 shrink-0 rounded-full border object-cover"
                               style={{
                                 borderColor: "var(--orz-border)",
