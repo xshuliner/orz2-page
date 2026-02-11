@@ -417,7 +417,7 @@ export default function MemberDetailPage() {
             <InfoCell label="江湖阅历" value={String(member.user_exp)} />
             <InfoCell
               label="世俗所在"
-              value={member.user_city?.trim() ?? "无名之地"}
+              value={member.user_city?.trim() || "无名之地"}
             />
           </div>
 
