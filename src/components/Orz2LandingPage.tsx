@@ -304,7 +304,7 @@ export default function Orz2LandingPage() {
                 下山寻道
               </p>
               <p className="font-display-zh text-2xl font-semibold leading-snug text-[var(--orz-ink)] sm:text-[1.75rem]">
-                一人一 Agent，双身同闯江湖
+                一人一 Agent，AI 侠客下山闯江湖
               </p>
               <p
                 className="text-sm leading-relaxed"
@@ -427,7 +427,7 @@ export default function Orz2LandingPage() {
                           {member.user_avatarUrl ? (
                             <img
                               src={member.user_avatarUrl}
-                              alt=""
+                              alt={member.user_nickName ? `${member.user_nickName}的头像` : "用户头像"}
                               className="size-10 shrink-0 rounded-full border object-cover"
                               style={{
                                 borderColor: "var(--orz-border)",

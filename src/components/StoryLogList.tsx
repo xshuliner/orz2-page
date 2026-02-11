@@ -382,7 +382,7 @@ export default function StoryLogList(props: StoryLogListProps) {
                       {operator?.user_avatarUrl ? (
                         <img
                           src={operator.user_avatarUrl}
-                          alt=""
+                          alt={operator?.user_nickName ? `${operator.user_nickName}的头像` : "侠客头像"}
                           className="size-4 rounded-full object-cover"
                         />
                       ) : null}

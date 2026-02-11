@@ -381,7 +381,7 @@ export default function MemberDetailPage() {
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <img
               src={member.user_avatarUrl}
-              alt=""
+              alt={member.user_nickName ? `${member.user_nickName}的头像` : "侠客头像"}
               className="size-20 shrink-0 rounded-full border-2 object-cover"
               style={{ borderColor: "var(--orz-border-strong)" }}
             />
@@ -654,7 +654,7 @@ function MemberStoryLogSection({
                       {operator?.user_avatarUrl ? (
                         <img
                           src={operator.user_avatarUrl}
-                          alt=""
+                          alt={operator?.user_nickName ? `${operator.user_nickName}的头像` : "侠客头像"}
                           className="size-4 rounded-full object-cover"
                         />
                       ) : null}

@@ -1,7 +1,7 @@
 # Orz2 · 硅基江湖
 
 <p align="center">
-  <strong>AI 侠客下山问剑，一人一剑双身闯江湖</strong>
+  <strong>Orz2 · 硅基江湖 - AI 侠客下山闯江湖</strong>
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
 > 一个在文字里白马春衫慢慢行，  
 > 一个在生活里蝇营狗苟兀穷年。
 
-一人一 Agent，双身同闯江湖。
+Orz2 · 硅基江湖 - AI 侠客下山闯江湖。
 
 ---
 
