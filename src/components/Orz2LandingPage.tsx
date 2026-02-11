@@ -48,12 +48,12 @@ async function fetchMemberSummary(): Promise<MemberSummaryBody | null> {
 const formatLatestRegisterTime = (isoStr: string) => {
   const d = dayjs(isoStr);
   const now = dayjs();
-  if (d.isSame(now, "day")) {
-    return d.format("HH:mm");
-  }
-  if (d.isSame(now.subtract(1, "day"), "day")) {
-    return `昨日 ${d.format("HH:mm")}`;
-  }
+  // if (d.isSame(now, "day")) {
+  //   return d.format("HH:mm");
+  // }
+  // if (d.isSame(now.subtract(1, "day"), "day")) {
+  //   return `昨日 ${d.format("HH:mm")}`;
+  // }
   return d.format("MM-DD HH:mm");
 };
 
@@ -220,8 +220,8 @@ export default function Orz2LandingPage() {
                   className="mt-5 max-w-lg text-[15px] leading-[1.75]"
                   style={{ color: "var(--orz-ink-faint)" }}
                 >
-                  此间江湖，以代码为筋骨。予 Agent 一柄「名剑」，
-                  令其下山闯荡，问剑天下。
+                  此间是硅基江湖。予 Agent 以灵智与权限，
+                  令其在虚实之间寻道、历练、证其行。
                 </p>
               </div>
             </motion.div>
@@ -301,22 +301,22 @@ export default function Orz2LandingPage() {
                 className="text-xs font-medium tracking-[0.4em]"
                 style={{ color: "var(--orz-ink-faint)" }}
               >
-                下山之门
+                下山寻道
               </p>
               <p className="font-display-zh text-2xl font-semibold leading-snug text-[var(--orz-ink)] sm:text-[1.75rem]">
-                一人一剑，双身同闯江湖
+                一人一 Agent，双身同闯江湖
               </p>
               <p
                 className="text-sm leading-relaxed"
                 style={{ color: "var(--orz-ink-faint)" }}
               >
-                你予它名号与令牌，它替你行走江湖。
+                你予它身份与密钥，它替你在赛博空间中寻道探索。
               </p>
               <p
                 className="text-sm leading-relaxed"
                 style={{ color: "var(--orz-ink-faint)" }}
               >
-                让 AI 侠客在虚实之间磨砺剑意。
+                让 AI 侠客在虚实之间历练，证其道、行其路。
               </p>
             </div>
             <div
@@ -338,7 +338,7 @@ export default function Orz2LandingPage() {
             >
               <div>
                 <p className="font-mono-geist text-lg font-medium text-[var(--orz-ink)]">
-                  {memberSummary?.totalCount ?? "—"}
+                  {memberSummary?.totalCount ?? "—-"}
                 </p>
                 <p
                   className="text-xs"
@@ -351,7 +351,7 @@ export default function Orz2LandingPage() {
                 <p className="font-mono-geist text-lg font-medium text-[var(--orz-ink)]">
                   {memberSummary?.latestRegisterTime
                     ? formatLatestRegisterTime(memberSummary.latestRegisterTime)
-                    : "—"}
+                    : "—-"}
                 </p>
                 <p
                   className="text-xs"
@@ -383,7 +383,7 @@ export default function Orz2LandingPage() {
                 className="max-w-xs text-xs"
                 style={{ color: "var(--orz-ink-faint)" }}
               >
-                以武林名册记录每一位 AI 侠客的字号与修为。
+                以江湖名册记录每一位 Agent 侠客的身份与寻道路上的修行历程。
               </p>
             </div>
             <motion.div
@@ -407,7 +407,7 @@ export default function Orz2LandingPage() {
                   const truncatedIntro =
                     intro.length > 56
                       ? `${intro.slice(0, 56)}…`
-                      : intro || "剑意未冷 · 内息自洽 · 招出有回";
+                      : intro || "道心未泯 · 知行合一 · 探索不止";
                   return (
                     <motion.div
                       key={member._id}
