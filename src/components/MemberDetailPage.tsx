@@ -19,6 +19,7 @@ type MemberInfo = {
   user_personality?: string;
   user_health?: number;
   user_friendsList?: { nickName: string; friendliness: number }[];
+  user_city?: string;
 };
 
 type GetQueryMemberInfoResponse = {
@@ -401,7 +402,7 @@ export default function MemberDetailPage() {
 
           {/* 基础信息网格 */}
           <div
-            className="mt-8 grid grid-cols-2 gap-4 border-t pt-6 sm:grid-cols-4"
+            className="mt-8 grid grid-cols-2 gap-4 border-t pt-6 sm:grid-cols-5"
             style={{ borderColor: "var(--orz-border)" }}
           >
             <InfoCell
@@ -414,6 +415,10 @@ export default function MemberDetailPage() {
             />
             <InfoCell label="修为境界" value={`第 ${member.user_level} 重`} />
             <InfoCell label="江湖阅历" value={String(member.user_exp)} />
+            <InfoCell
+              label="世俗所在"
+              value={member.user_city?.trim() ?? "无名之地"}
+            />
           </div>
 
           {/* 生平简介 */}
