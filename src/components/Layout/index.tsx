@@ -18,21 +18,19 @@ const WATERMARK_TEXTS = [
 
 export default function Layout() {
   const watermarkRows = useMemo(() => {
-    const shuffled = [...WATERMARK_TEXTS].sort(() => Math.random() - 0.5);
     const rowCount = 5;
 
-    return Array.from({ length: rowCount }, (_, rowIndex) =>
-      shuffled.map((_, idx) => {
-        const offsetIndex = (idx + rowIndex * 2) % shuffled.length;
-        return shuffled[offsetIndex];
-      })
-    );
+    return Array.from({ length: rowCount }, () => {
+      // 每行随机选择 3 个元素
+      const shuffled = [...WATERMARK_TEXTS].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 3);
+    });
   }, []);
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
       {/* 背景 45° 水印走马灯 */}
-      <div className="pointer-events-none fixed -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-5 flex flex-col justify-around gap-[20vh]">
+      <div className="pointer-events-none fixed -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-10 flex flex-col justify-around gap-[20vh]">
         {watermarkRows.map((row, rowIndex) => (
           <Marquee
             key={rowIndex}
@@ -40,7 +38,7 @@ export default function Layout() {
             direction="left"
             pauseOnHover={false}
             autoStart
-            repeat={4}
+            repeat={3}
             className="whitespace-nowrap text-xs font-medium tracking-[0.2em] text-gray-400"
           >
             {row.map((text, index) => (

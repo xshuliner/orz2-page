@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback, type ReactNode, memo } from "react";
 
 export interface MarqueeProps {
   /** 走马灯内容 */
@@ -26,6 +25,29 @@ export interface MarqueeProps {
   height?: number | string;
 }
 
+// 子组件：单个内容项，使用 memo 优化
+const MarqueeItem = memo<{ 
+  children: ReactNode; 
+  isHorizontal: boolean; 
+  gap: number; 
+  isLast: boolean;
+  innerRef?: React.RefObject<HTMLDivElement | null>;
+}>(({ children, isHorizontal, gap, isLast, innerRef }) => (
+  <div
+    ref={innerRef}
+    className={`flex-shrink-0 ${isHorizontal ? "flex flex-row" : "flex flex-col"}`}
+    style={
+      isHorizontal
+        ? { marginRight: !isLast ? `${gap}px` : 0 }
+        : { marginBottom: !isLast ? `${gap}px` : 0 }
+    }
+  >
+    {children}
+  </div>
+));
+
+MarqueeItem.displayName = "MarqueeItem";
+
 export const Marquee: React.FC<MarqueeProps> = ({
   children,
   speed = 50,
@@ -41,30 +63,37 @@ export const Marquee: React.FC<MarqueeProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<HTMLDivElement>(null);
   const [contentSize, setContentSize] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const animationIdRef = useRef<string>("");
 
-  const isHorizontal = direction === "left" || direction === "right";
-  const isReverse = direction === "right" || direction === "down";
+  const isHorizontal = useMemo(() => direction === "left" || direction === "right", [direction]);
+  const isReverse = useMemo(() => direction === "right" || direction === "down", [direction]);
 
-  // 格式化尺寸值
-  const formatSize = (
+  // 格式化尺寸值 - 使用 useCallback 优化
+  const formatSize = useCallback((
     size: number | string | undefined
   ): string | undefined => {
     if (size === undefined) return undefined;
     return typeof size === "number" ? `${size}px` : size;
-  };
+  }, []);
 
-  // 测量内容尺寸
+  // 测量内容尺寸 - 添加防抖优化
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const measureContent = () => {
-      if (contentRef.current) {
-        const size = isHorizontal
-          ? contentRef.current.scrollWidth
-          : contentRef.current.scrollHeight;
-        setContentSize(size + gap);
-      }
+      // 防抖处理
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (contentRef.current) {
+          const size = isHorizontal
+            ? contentRef.current.scrollWidth
+            : contentRef.current.scrollHeight;
+          setContentSize(size + gap);
+        }
+      }, 100);
     };
 
     measureContent();
@@ -75,8 +104,68 @@ export const Marquee: React.FC<MarqueeProps> = ({
       resizeObserver.observe(contentRef.current);
     }
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+    };
   }, [children, gap, isHorizontal]);
+
+  // 生成唯一的动画名称
+  useEffect(() => {
+    animationIdRef.current = `marquee-${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
+
+  // 动态注入 CSS 动画
+  useEffect(() => {
+    if (contentSize === 0 || !autoStart) return;
+
+    const duration = contentSize / speed;
+    const animationName = animationIdRef.current;
+
+    // 创建 style 标签
+    const styleId = `${animationName}-style`;
+    let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+    
+    if (!styleElement) {
+      styleElement = document.createElement("style");
+      styleElement.id = styleId;
+      document.head.appendChild(styleElement);
+    }
+
+    // 定义关键帧动画
+    if (isHorizontal) {
+      const startX = isReverse ? -contentSize : 0;
+      const endX = isReverse ? 0 : -contentSize;
+      styleElement.textContent = `
+        @keyframes ${animationName} {
+          0% { transform: translate3d(${startX}px, 0, 0); }
+          100% { transform: translate3d(${endX}px, 0, 0); }
+        }
+      `;
+    } else {
+      const startY = isReverse ? -contentSize : 0;
+      const endY = isReverse ? 0 : -contentSize;
+      styleElement.textContent = `
+        @keyframes ${animationName} {
+          0% { transform: translate3d(0, ${startY}px, 0); }
+          100% { transform: translate3d(0, ${endY}px, 0); }
+        }
+      `;
+    }
+
+    // 应用动画到元素
+    if (animationRef.current) {
+      animationRef.current.style.animation = `${animationName} ${duration}s linear infinite`;
+    }
+
+    // 清理函数
+    return () => {
+      const elem = document.getElementById(styleId);
+      if (elem) {
+        elem.remove();
+      }
+    };
+  }, [contentSize, speed, isHorizontal, isReverse, autoStart]);
 
   // 监听动画完成
   useEffect(() => {
@@ -92,65 +181,37 @@ export const Marquee: React.FC<MarqueeProps> = ({
     return () => clearInterval(interval);
   }, [onComplete, contentSize, speed, isPaused]);
 
-  // 处理暂停/恢复
-  const handleMouseEnter = () => {
+  // 处理暂停/恢复 - 使用 useCallback 优化
+  const handleMouseEnter = useCallback(() => {
     if (pauseOnHover) {
-      setIsHovered(true);
       setIsPaused(true);
+      if (animationRef.current) {
+        animationRef.current.style.animationPlayState = "paused";
+      }
     }
-  };
+  }, [pauseOnHover]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     if (pauseOnHover) {
-      setIsHovered(false);
       setIsPaused(false);
+      if (animationRef.current) {
+        animationRef.current.style.animationPlayState = "running";
+      }
     }
-  };
+  }, [pauseOnHover]);
 
-  // 计算动画属性
-  const getAnimationProps = () => {
-    if (!autoStart || contentSize === 0) {
-      return {};
-    }
-
-    const duration = contentSize / speed;
-
-    if (isHorizontal) {
-      const startX = isReverse ? -contentSize : 0;
-      const endX = isReverse ? 0 : -contentSize;
-
-      return {
-        animate: isHovered ? {} : { x: [startX, endX] },
-        transition: {
-          duration,
-          ease: "linear" as const,
-          repeat: Infinity,
-          repeatType: "loop" as const,
-        },
-      };
-    } else {
-      const startY = isReverse ? -contentSize : 0;
-      const endY = isReverse ? 0 : -contentSize;
-
-      return {
-        animate: isHovered ? {} : { y: [startY, endY] },
-        transition: {
-          duration,
-          ease: "linear" as const,
-          repeat: Infinity,
-          repeatType: "loop" as const,
-        },
-      };
-    }
-  };
-
-  const animationProps = getAnimationProps();
-
-  // 容器样式
-  const containerStyle: React.CSSProperties = {
+  // 容器样式 - 使用 useMemo 优化
+  const containerStyle = useMemo<React.CSSProperties>(() => ({
     width: formatSize(width),
     height: formatSize(height),
-  };
+  }), [width, height, formatSize]);
+
+  // 动画容器样式 - 使用 useMemo 优化
+  const animationStyle = useMemo<React.CSSProperties>(() => ({
+    willChange: isHorizontal ? "transform" : "transform",
+    backfaceVisibility: "hidden",
+    perspective: 1000,
+  }), [isHorizontal]);
 
   return (
     <div
@@ -160,27 +221,23 @@ export const Marquee: React.FC<MarqueeProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <motion.div
-        {...animationProps}
+      <div
+        ref={animationRef}
         className={`flex ${isHorizontal ? "flex-row" : "flex-col"}`}
+        style={animationStyle}
       >
         {Array.from({ length: repeat }).map((_, index) => (
-          <div
+          <MarqueeItem
             key={index}
-            ref={index === 0 ? contentRef : null}
-            className={`flex-shrink-0 ${
-              isHorizontal ? "flex flex-row" : "flex flex-col"
-            }`}
-            style={
-              isHorizontal
-                ? { marginRight: index < repeat - 1 ? `${gap}px` : 0 }
-                : { marginBottom: index < repeat - 1 ? `${gap}px` : 0 }
-            }
+            isHorizontal={isHorizontal}
+            gap={gap}
+            isLast={index === repeat - 1}
+            innerRef={index === 0 ? contentRef : undefined}
           >
             {children}
-          </div>
+          </MarqueeItem>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 };
