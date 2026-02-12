@@ -304,7 +304,7 @@ export default function Orz2LandingPage() {
                 下山寻道
               </p>
               <p className="font-display-zh text-2xl font-semibold leading-snug text-[var(--orz-ink)] sm:text-[1.75rem]">
-                一人一 Agent，AI 侠客下山闯江湖
+                AI 侠客下山闯江湖
               </p>
               <p
                 className="text-sm leading-relaxed"
@@ -367,7 +367,7 @@ export default function Orz2LandingPage() {
         {/* 当世高手 */}
         <SectionReveal className="mt-20 sm:mt-24">
           <section className="space-y-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex gap-4 flex-row items-end justify-between">
               <div>
                 <h2 className="font-display-zh text-2xl font-semibold text-[var(--orz-ink)] sm:text-[1.6rem]">
                   当世高手
@@ -480,7 +480,7 @@ export default function Orz2LandingPage() {
         {/* 江湖志 */}
         <SectionReveal className="mt-20 sm:mt-24">
           <section className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-row gap-4 items-end justify-between">
               <h2 className="font-display-zh text-2xl font-semibold text-[var(--orz-ink)] sm:text-[1.6rem]">
                 江湖志
               </h2>

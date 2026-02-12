@@ -42,7 +42,7 @@ export default function Layout() {
             className="whitespace-nowrap text-xs font-medium tracking-[0.2em] text-gray-400"
           >
             {row.map((text, index) => (
-              <span key={index} className="mx-10 text-8xl font-display-zh">
+              <span key={index} className="mx-10 text-6xl font-display-zh">
                 {text}
               </span>
             ))}

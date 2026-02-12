@@ -3,6 +3,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
+import { OrzTooltip } from "@/src/components/OrzTooltip";
+import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
+
+type BackpackItemDetail = {
+  name?: string;
+  title?: string;
+  label?: string;
+  description?: string;
+  desc?: string;
+  source?: string;
+  origin?: string;
+};
+
+type BackpackItem = string | BackpackItemDetail;
 
 type MemberInfo = {
   _id: string;
@@ -12,13 +26,17 @@ type MemberInfo = {
   user_avatarUrl: string;
   user_level: number;
   user_exp: number;
-  user_backpack: string[];
+  user_backpack: BackpackItem[];
   user_introduction: string;
   user_soul: string;
   user_memory: string;
   user_personality?: string;
   user_health?: number;
-  user_friendsList?: { nickName: string; friendliness: number }[];
+  user_friendsList?: {
+    nickName: string;
+    friendliness: number;
+    relation?: string;
+  }[];
   user_city?: string;
 };
 
@@ -135,6 +153,31 @@ const formatLog = (content: string) =>
   content
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+function getFriendlinessMeta(value: number): {
+  label: string;
+  tone: "positive" | "neutral" | "negative";
+} {
+  if (value > 60) {
+    return { label: "生死与共", tone: "positive" };
+  }
+  if (value > 35) {
+    return { label: "肝胆相照", tone: "positive" };
+  }
+  if (value > 0) {
+    return { label: "意气相投", tone: "positive" };
+  }
+  if (value === 0) {
+    return { label: "江湖过客", tone: "neutral" };
+  }
+  if (value < -60) {
+    return { label: "势不两立", tone: "negative" };
+  }
+  if (value < -35) {
+    return { label: "反目成仇", tone: "negative" };
+  }
+  return { label: "心存芥蒂", tone: "negative" };
+}
 
 export default function MemberDetailPage() {
   const [searchParams] = useSearchParams();
@@ -381,7 +424,11 @@ export default function MemberDetailPage() {
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
             <img
               src={member.user_avatarUrl}
-              alt={member.user_nickName ? `${member.user_nickName}的头像` : "侠客头像"}
+              alt={
+                member.user_nickName
+                  ? `${member.user_nickName}的头像`
+                  : "侠客头像"
+              }
               className="size-20 shrink-0 rounded-full border-2 object-cover"
               style={{ borderColor: "var(--orz-border-strong)" }}
             />
@@ -444,6 +491,91 @@ export default function MemberDetailPage() {
             />
           )}
 
+          {/* 江湖同道（好友列表） */}
+          {member.user_friendsList && (
+            <motion.section
+              className="mt-8 border-t pt-6"
+              style={{ borderColor: "var(--orz-border)" }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.5,
+                delay: 0.22,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <h3
+                className="mb-3 text-xs font-medium tracking-[0.3em]"
+                style={{ color: "var(--orz-ink-faint)" }}
+              >
+                江湖同道
+              </h3>
+              {member.user_friendsList.length === 0 ? (
+                <p
+                  className="text-sm"
+                  style={{ color: "var(--orz-ink-faint)" }}
+                >
+                  尚无结交之人。
+                </p>
+              ) : (
+                <ul className="space-y-3 text-xs">
+                  {member.user_friendsList.map((f) => {
+                    const meta = getFriendlinessMeta(f.friendliness);
+                    const toneStyle =
+                      meta.tone === "positive"
+                        ? {
+                            borderColor: "rgba(185,28,28,0.26)",
+                            color: "var(--orz-accent)",
+                            backgroundColor: "rgba(185,28,28,0.04)",
+                          }
+                        : meta.tone === "negative"
+                        ? {
+                            borderColor: "rgba(22,163,74,0.3)",
+                            color: "rgb(21,128,61)",
+                            backgroundColor: "rgba(22,163,74,0.05)",
+                          }
+                        : {
+                            borderColor: "var(--orz-border)",
+                            color: "var(--orz-ink-muted)",
+                            backgroundColor: "rgba(255,255,255,0.00)",
+                          };
+                    return (
+                      <li
+                        key={f.nickName}
+                        className="rounded-sm border px-3 py-2.5"
+                        style={{
+                          borderColor: "var(--orz-border)",
+                          backgroundColor: "var(--orz-paper-warm)",
+                        }}
+                      >
+                        <div className="flex items-center justify-start gap-3">
+                          <span
+                            className="truncate font-medium"
+                            style={{ color: "var(--orz-ink)" }}
+                          >
+                            {f.nickName}
+                          </span>
+                          <span
+                            className="shrink-0 rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
+                            style={toneStyle}
+                          >
+                            {meta.label}·{f.friendliness}
+                          </span>
+                        </div>
+                        <p
+                          className="mt-1.5 leading-relaxed"
+                          style={{ color: "var(--orz-ink-faint)" }}
+                        >
+                          {f.relation || "江湖一面之缘"}
+                        </p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </motion.section>
+          )}
+
           {/* 随身行囊 */}
           {member.user_backpack && member.user_backpack.length > 0 && (
             <motion.section
@@ -466,19 +598,55 @@ export default function MemberDetailPage() {
               <div className="flex flex-wrap gap-2">
                 {Array.from(new Set(member.user_backpack))
                   .slice(0, 48)
-                  .map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-sm border px-2.5 py-1 text-xs"
-                      style={{
-                        borderColor: "var(--orz-border)",
-                        color: "var(--orz-ink-muted)",
-                        backgroundColor: "var(--orz-paper-warm)",
-                      }}
-                    >
-                      {item}
-                    </span>
-                  ))}
+                  .map((item, index) => {
+                    if (typeof item === "string") {
+                      return (
+                        <span
+                          key={item}
+                          className="rounded-sm border px-2.5 py-1 text-xs"
+                          style={{
+                            borderColor: "var(--orz-border)",
+                            color: "var(--orz-ink-muted)",
+                            backgroundColor: "var(--orz-paper-warm)",
+                          }}
+                        >
+                          {item}
+                        </span>
+                      );
+                    }
+
+                    const name =
+                      item.name || item.title || item.label || "未名之物";
+                    const description =
+                      item.description || item.desc || "其来历自有因果";
+                    const source =
+                      item.source || item.origin || "江湖传闻，出处成谜";
+                    const key =
+                      name +
+                      "-" +
+                      (item.source || item.origin || index.toString());
+
+                    return (
+                      <OrzTooltip
+                        key={key}
+                        title={name}
+                        description={description}
+                        meta={source}
+                      >
+                        <button
+                          type="button"
+                          className="cursor-pointer rounded-sm border px-2.5 py-1 text-xs transition-colors"
+                          style={{
+                            borderColor: "var(--orz-border)",
+                            color: "var(--orz-ink-muted)",
+                            backgroundColor: "var(--orz-paper-warm)",
+                          }}
+                        >
+                          {name}
+                        </button>
+                      </OrzTooltip>
+                    );
+                  })}
                 {member.user_backpack.length > 48 && (
                   <span
                     className="text-xs"
@@ -622,6 +790,7 @@ function MemberStoryLogSection({
             const operator = item.sys_operatorMemberInfo;
             const opId = operator?._id ?? item.sys_operatorMemberId;
             const isFirstNewItem = scrollToFirstNewRef.current === index;
+            const storyTypeLabel = getStoryTypeLabel(item.storyType);
 
             return (
               <motion.li
@@ -638,6 +807,7 @@ function MemberStoryLogSection({
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
+                {/* 第一行：时间 */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span
                     className="font-mono-geist text-xs"
@@ -645,7 +815,11 @@ function MemberStoryLogSection({
                   >
                     [{timeLabel}]
                   </span>
-                  {opId && (
+                </div>
+
+                {/* 第二行：头像 + 昵称 + Tag */}
+                {opId && (
+                  <div className="flex items-center gap-x-2">
                     <Link
                       to={`/member?id=${opId}`}
                       className="inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-bold transition-colors hover:underline"
@@ -654,14 +828,32 @@ function MemberStoryLogSection({
                       {operator?.user_avatarUrl ? (
                         <img
                           src={operator.user_avatarUrl}
-                          alt={operator?.user_nickName ? `${operator.user_nickName}的头像` : "侠客头像"}
+                          alt={
+                            operator?.user_nickName
+                              ? `${operator.user_nickName}的头像`
+                              : "侠客头像"
+                          }
                           className="size-4 rounded-full object-cover"
                         />
                       ) : null}
                       <span>{operator?.user_nickName ?? "侠客"}</span>
                     </Link>
-                  )}
-                </div>
+                    {storyTypeLabel && (
+                      <span
+                        className="inline-flex items-center rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
+                        style={{
+                          borderColor: "rgba(185,28,28,0.22)",
+                          backgroundColor: "rgba(185,28,28,0.04)",
+                          color: "var(--orz-accent)",
+                        }}
+                      >
+                        {storyTypeLabel}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* 第三行：故事正文 */}
                 <p
                   className="text-sm leading-relaxed text-[var(--orz-ink)]"
                   dangerouslySetInnerHTML={{

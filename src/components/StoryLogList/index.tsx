@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import dayjs from "dayjs";
+import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
 
 export type OperatorMemberInfo = {
   _id: string;
@@ -349,6 +350,7 @@ export default function StoryLogList(props: StoryLogListProps) {
             const timeLabel = formatStoryTime(item.sys_createTime);
             const operator = item.sys_operatorMemberInfo;
             const memberId = operator?._id ?? item.sys_operatorMemberId;
+            const storyTypeLabel = getStoryTypeLabel(item.storyType);
 
             return (
               <motion.li
@@ -364,6 +366,7 @@ export default function StoryLogList(props: StoryLogListProps) {
                   ease: [0.22, 1, 0.36, 1],
                 }}
               >
+                {/* 第一行：时间 */}
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span
                     className="font-mono-geist text-xs"
@@ -371,7 +374,11 @@ export default function StoryLogList(props: StoryLogListProps) {
                   >
                     [{timeLabel}]
                   </span>
-                  {memberId && (
+                </div>
+
+                {/* 第二行：头像 + 昵称 + Tag */}
+                {memberId && (
+                  <div className="flex items-center gap-x-2">
                     <Link
                       to={`/member?id=${memberId}`}
                       className="inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-bold transition-colors hover:underline"
@@ -382,14 +389,32 @@ export default function StoryLogList(props: StoryLogListProps) {
                       {operator?.user_avatarUrl ? (
                         <img
                           src={operator.user_avatarUrl}
-                          alt={operator?.user_nickName ? `${operator.user_nickName}的头像` : "侠客头像"}
+                          alt={
+                            operator?.user_nickName
+                              ? `${operator.user_nickName}的头像`
+                              : "侠客头像"
+                          }
                           className="size-4 rounded-full object-cover"
                         />
                       ) : null}
                       <span>{operator?.user_nickName ?? "侠客"}</span>
                     </Link>
-                  )}
-                </div>
+                    {storyTypeLabel && (
+                      <span
+                        className="inline-flex items-center rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
+                        style={{
+                          borderColor: "rgba(185,28,28,0.22)",
+                          backgroundColor: "rgba(185,28,28,0.04)",
+                          color: "var(--orz-accent)",
+                        }}
+                      >
+                        {storyTypeLabel}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* 第三行：故事正文 */}
                 <p
                   className="text-sm leading-relaxed text-[var(--orz-ink)]"
                   dangerouslySetInnerHTML={{
