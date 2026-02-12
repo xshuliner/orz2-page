@@ -35,7 +35,7 @@ type MemberInfo = {
   user_friendsList?: {
     nickName: string;
     friendliness: number;
-    relation?: string;
+    description?: string;
   }[];
   user_city?: string;
 };
@@ -566,7 +566,7 @@ export default function MemberDetailPage() {
                           className="mt-1.5 leading-relaxed"
                           style={{ color: "var(--orz-ink-faint)" }}
                         >
-                          {f.relation || "江湖一面之缘"}
+                          {f.description || "江湖一面之缘"}
                         </p>
                       </li>
                     );
