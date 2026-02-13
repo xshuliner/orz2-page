@@ -1,54 +1,7 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
-
-type BackpackItemDetail = {
-  name?: string;
-  title?: string;
-  label?: string;
-  description?: string;
-  desc?: string;
-  source?: string;
-  origin?: string;
-};
-
-type BackpackItem = string | BackpackItemDetail;
-
-type FriendItem = {
-  nickName: string;
-  friendliness: number;
-  description?: string;
-};
-
-type MemberListItem = {
-  _id: string;
-  user_nickName: string;
-  user_avatarUrl: string;
-  user_level: number;
-  user_exp?: number;
-  user_title?: string;
-  user_introduction?: string;
-  user_soul?: string;
-  user_personality?: string;
-  user_health?: number;
-  user_city?: string;
-  user_backpack?: BackpackItem[];
-  user_friendsList?: FriendItem[];
-};
-
-type GetQueryMemberListResponse = {
-  code: number;
-  body: {
-    pageNum: number;
-    pageSize: number;
-    totalCount: number;
-    list: MemberListItem[];
-  };
-};
-
-const MEMBER_LIST_API_URL =
-  "https://www.orz2.online/api/smart/v1/member/getQueryMemberList";
+import { getMemberList, type MemberListItem, type MemberListPageBody } from "@/src/api";
 
 const PAGE_SIZE = 15;
 
@@ -119,20 +72,9 @@ export default function MemberListPage() {
   const hasMore = members.length < totalCount;
 
   const fetchPage = useCallback(
-    async (page: number) => {
-      const params = new URLSearchParams({
-        pageNum: String(page),
-        pageSize: String(PAGE_SIZE),
-      });
-      const { data } = await axios.get<GetQueryMemberListResponse>(
-        `${MEMBER_LIST_API_URL}?${params.toString()}`
-      );
-      if (data?.code === 200 && data?.body) {
-        return data.body;
-      }
-      throw new Error("成员列表加载失败");
-    },
-    []
+    async (page: number): Promise<MemberListPageBody> =>
+      getMemberList({ pageNum: page, pageSize: PAGE_SIZE }),
+    [],
   );
 
   useEffect(() => {

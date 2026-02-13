@@ -1,76 +1,15 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import axios from "axios";
 import dayjs from "dayjs";
 import { OrzTooltip } from "@/src/components/OrzTooltip";
 import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
-
-type BackpackItemDetail = {
-  name?: string;
-  title?: string;
-  label?: string;
-  description?: string;
-  desc?: string;
-  source?: string;
-  origin?: string;
-};
-
-type BackpackItem = string | BackpackItemDetail;
-
-type MemberInfo = {
-  _id: string;
-  sys_createTime: string;
-  sys_updateTime: string;
-  user_nickName: string;
-  user_avatarUrl: string;
-  user_level: number;
-  user_exp: number;
-  user_backpack: BackpackItem[];
-  user_introduction: string;
-  user_soul: string;
-  user_memory: string;
-  user_personality?: string;
-  user_health?: number;
-  user_friendsList?: {
-    nickName: string;
-    friendliness: number;
-    description?: string;
-  }[];
-  user_city?: string;
-};
-
-type GetQueryMemberInfoResponse = {
-  code: number;
-  body: { memberInfo: MemberInfo };
-};
-
-type OperatorMemberInfo = {
-  _id: string;
-  user_nickName: string;
-  user_avatarUrl: string;
-};
-
-type StoryItem = {
-  _id: string;
-  sys_createTime: string;
-  sys_updateTime: string;
-  sys_operatorMemberId: string;
-  sys_operatorMemberInfo?: OperatorMemberInfo;
-  relatedMemberIds: string[];
-  storyType: string;
-  content: string;
-};
-
-type StoryListResult = {
-  list: StoryItem[];
-  pageNum: number;
-  pageSize: number;
-  totalCount: number;
-};
-
-const MEMBER_API_URL =
-  "https://www.orz2.online/api/smart/v1/member/getQueryMemberInfo";
+import {
+  getMemberInfo,
+  getStoryList,
+  type MemberInfo,
+  type StoryItem,
+} from "@/src/api";
 
 const SHICHEN = [
   "子时",
@@ -94,55 +33,7 @@ const formatTime = (isoStr: string) => {
   return `${d.format("YYYY-MM-DD HH:mm")} · ${getShichen(d.hour())}`;
 };
 
-const STORY_API_URL =
-  "https://www.orz2.online/api/smart/v1/story/getQueryStoryList";
-
 const STORY_PAGE_SIZE = 15;
-
-async function fetchMemberInfo(id: string): Promise<MemberInfo | null> {
-  const { data } = await axios.get<GetQueryMemberInfoResponse>(
-    `${MEMBER_API_URL}?id=${id}`
-  );
-  if (data?.code === 200 && data?.body?.memberInfo) {
-    return data.body.memberInfo;
-  }
-  return null;
-}
-
-async function fetchStoryList(options: {
-  pageNum: number;
-  pageSize: number;
-  memberId: string;
-}): Promise<StoryListResult> {
-  const params = new URLSearchParams({
-    pageNum: String(options.pageNum),
-    pageSize: String(options.pageSize),
-    memberId: options.memberId,
-  });
-  const { data } = await axios.get<{
-    code: number;
-    body: {
-      pageNum: number;
-      pageSize: number;
-      totalCount: number;
-      list: StoryItem[];
-    };
-  }>(`${STORY_API_URL}?${params.toString()}`);
-  if (data?.code === 200 && data?.body) {
-    return {
-      list: data.body.list ?? [],
-      pageNum: data.body.pageNum,
-      pageSize: data.body.pageSize,
-      totalCount: data.body.totalCount ?? 0,
-    };
-  }
-  return {
-    list: [],
-    pageNum: options.pageNum,
-    pageSize: options.pageSize,
-    totalCount: 0,
-  };
-}
 
 const formatStoryTime = (isoStr: string) => {
   const d = dayjs(isoStr);
@@ -205,8 +96,8 @@ export default function MemberDetailPage() {
       return;
     }
     let cancelled = false;
-    fetchMemberInfo(id)
-      .then((info) => {
+    getMemberInfo(id)
+      .then((info: MemberInfo | null) => {
         if (!cancelled) {
           setMember(info);
           setError(info ? null : "未找到该侠客");
@@ -233,7 +124,7 @@ export default function MemberDetailPage() {
     setStoryLoading(true);
     setStoryList([]);
     setStoryPageNum(0);
-    fetchStoryList({ memberId: mid, pageNum: 0, pageSize: STORY_PAGE_SIZE })
+    getStoryList({ memberId: mid, pageNum: 0, pageSize: STORY_PAGE_SIZE })
       .then((res) => {
         if (!cancelled) {
           setStoryList(res.list);
@@ -264,7 +155,7 @@ export default function MemberDetailPage() {
     const nextPage = storyPageNum + 1;
     setStoryLoadingMore(true);
 
-    fetchStoryList({
+    getStoryList({
       memberId: mid,
       pageNum: nextPage,
       pageSize: STORY_PAGE_SIZE,

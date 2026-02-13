@@ -1,46 +1,13 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import dayjs from "dayjs";
 import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
-
-export type OperatorMemberInfo = {
-  _id: string;
-  user_nickName: string;
-  user_avatarUrl: string;
-};
-
-export type StoryItem = {
-  _id: string;
-  sys_createTime: string;
-  sys_updateTime: string;
-  sys_operatorMemberId: string;
-  sys_operatorMemberInfo?: OperatorMemberInfo;
-  relatedMemberIds: string[];
-  storyType: string;
-  content: string;
-};
-
-export type StoryListResult = {
-  list: StoryItem[];
-  pageNum: number;
-  pageSize: number;
-  totalCount: number;
-};
-
-type GetQueryStoryListResponse = {
-  code: number;
-  body: {
-    pageNum: number;
-    pageSize: number;
-    totalCount: number;
-    list: StoryItem[];
-  };
-};
-
-const STORY_API_URL =
-  "https://www.orz2.online/api/smart/v1/story/getQueryStoryList";
+import {
+  getStoryList,
+  type StoryItem,
+  type StoryListResult,
+} from "@/src/api";
 
 const DEFAULT_PAGE_SIZE = 15;
 export const POLL_INTERVAL_MS = 60 * 1000;
@@ -76,36 +43,20 @@ const formatLog = (content: string) =>
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>");
 
-/** 分页获取故事列表 */
+/** 分页获取故事列表（内部统一走 src/api） */
 async function fetchStoryListWithPagination(options: {
   pageNum?: number;
   pageSize?: number;
   memberId?: string;
 }): Promise<StoryListResult> {
   const { pageNum = 0, pageSize = DEFAULT_PAGE_SIZE, memberId } = options;
-  const params = new URLSearchParams({
-    pageNum: String(pageNum),
-    pageSize: String(pageSize),
-  });
-  if (memberId) params.set("memberId", memberId);
-  const { data } = await axios.get<GetQueryStoryListResponse>(
-    `${STORY_API_URL}?${params.toString()}`
-  );
-  if (data?.code === 200 && data?.body) {
-    return {
-      list: data.body.list ?? [],
-      pageNum: data.body.pageNum,
-      pageSize: data.body.pageSize,
-      totalCount: data.body.totalCount ?? 0,
-    };
-  }
-  return { list: [], pageNum, pageSize, totalCount: 0 };
+  return getStoryList({ pageNum, pageSize, memberId });
 }
 
 /** 获取全局故事列表（无 memberId 筛选），兼容旧用法 */
 export async function fetchStoryList(
   pageNum = 0,
-  pageSize = DEFAULT_PAGE_SIZE
+  pageSize = DEFAULT_PAGE_SIZE,
 ): Promise<StoryListResult> {
   return fetchStoryListWithPagination({ pageNum, pageSize });
 }
