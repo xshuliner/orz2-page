@@ -31,23 +31,29 @@ export default function Layout() {
     <div className="relative flex min-h-screen flex-col overflow-hidden">
       {/* 背景 45° 水印走马灯 */}
       <div className="pointer-events-none fixed -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-10 flex flex-col justify-around gap-[20vh]">
-        {watermarkRows.map((row, rowIndex) => (
-          <Marquee
-            key={rowIndex}
-            speed={40 + rowIndex * 8}
-            direction="left"
-            pauseOnHover={false}
-            autoStart
-            repeat={3}
-            className="whitespace-nowrap text-xs font-medium tracking-[0.2em] text-gray-400"
-          >
-            {row.map((text, index) => (
-              <span key={index} className="mx-10 text-6xl font-display-zh">
-                {text}
-              </span>
-            ))}
-          </Marquee>
-        ))}
+        {watermarkRows.map((row, rowIndex) => {
+          // 偶数行速度递增（正方向），奇数行速度递减（负方向），形成交替效果
+          const speedMultiplier = rowIndex % 2 === 0 ? 1 : -1;
+          const speed = 40 + rowIndex * 8 * speedMultiplier;
+          
+          return (
+            <Marquee
+              key={rowIndex}
+              speed={speed}
+              direction="left"
+              pauseOnHover={false}
+              autoStart
+              repeat={3}
+              className="whitespace-nowrap text-xs font-medium tracking-[0.2em] text-gray-400"
+            >
+              {row.map((text, index) => (
+                <span key={index} className="mx-10 text-6xl font-display-zh">
+                  {text}
+                </span>
+              ))}
+            </Marquee>
+          );
+        })}
       </div>
 
       <main className="relative z-10 flex-1">
