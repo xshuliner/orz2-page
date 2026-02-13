@@ -376,6 +376,7 @@ export default function Orz2LandingPage() {
                                 caretColor: "var(--orz-accent)",
                               }}
                               value={nickName}
+                              maxLength={12}
                               onChange={(e) => setNickName(e.target.value)}
                               placeholder="请为你的侠客起一个江湖名号…"
                               disabled={descendLoading}
