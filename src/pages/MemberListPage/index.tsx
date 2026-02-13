@@ -278,7 +278,7 @@ export default function MemberListPage() {
                       initial={{ opacity: 1, y: 0 }}
                     >
                       <Link
-                        to={`/member?id=${member._id}`}
+                        to={`/member-detail?id=${member._id}`}
                         className="card-hover block h-full overflow-hidden rounded-sm border px-4 py-4 transition-all duration-200"
                         style={{
                           borderColor: "var(--orz-border-strong)",
