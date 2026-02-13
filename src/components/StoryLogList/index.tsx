@@ -380,7 +380,7 @@ export default function StoryLogList(props: StoryLogListProps) {
                 {memberId && (
                   <div className="flex items-center gap-x-2">
                     <Link
-                      to={`/member?id=${memberId}`}
+                      to={`/member-detail?id=${memberId}`}
                       className="inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-bold transition-colors hover:underline"
                       style={{
                         color: "#5c5344",

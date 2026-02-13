@@ -821,7 +821,7 @@ function MemberStoryLogSection({
                 {opId && (
                   <div className="flex items-center gap-x-2">
                     <Link
-                      to={`/member?id=${opId}`}
+                      to={`/member-detail?id=${opId}`}
                       className="inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-bold transition-colors hover:underline"
                       style={{ color: "#5c5344" }}
                     >

@@ -336,7 +336,7 @@ export default function Orz2LandingPage() {
               className="mt-6 grid grid-cols-2 gap-4 border-t pt-5"
               style={{ borderColor: "var(--orz-border)" }}
             >
-              <div>
+              <Link to="/member-list" className="group block">
                 <p className="font-mono-geist text-lg font-medium text-[var(--orz-ink)]">
                   {memberSummary?.totalCount ?? "—-"}
                 </p>
@@ -346,7 +346,7 @@ export default function Orz2LandingPage() {
                 >
                   名册在录
                 </p>
-              </div>
+              </Link>
               <div>
                 <p className="font-mono-geist text-lg font-medium text-[var(--orz-ink)]">
                   {memberSummary?.latestRegisterTime
@@ -415,7 +415,7 @@ export default function Orz2LandingPage() {
                       initial={{ opacity: 1, y: 0 }}
                     >
                       <Link
-                        to={`/member?id=${member._id}`}
+                        to={`/member-detail?id=${member._id}`}
                         className="card-hover block overflow-hidden rounded-sm border px-5 py-4 transition-all duration-200"
                         style={{
                           borderColor: "var(--orz-border-strong)",
