@@ -242,7 +242,7 @@ export default function MemberDetailPage() {
           }}
         />
         <div className="grain-overlay" />
-        <div className="relative mx-auto max-w-3xl px-5 py-20">
+        <div className="relative mx-auto max-w-6xl px-5 py-20">
           <p style={{ color: "var(--orz-ink-faint)" }}>正在查阅名册…</p>
         </div>
       </div>
@@ -261,7 +261,7 @@ export default function MemberDetailPage() {
         />
         <div className="grain-overlay" />
         <PageTopBar />
-        <div className="relative mx-auto max-w-3xl px-5 pt-16 pb-20 text-center">
+        <div className="relative mx-auto max-w-6xl px-5 pt-16 pb-20 text-center">
           <p className="mb-6" style={{ color: "var(--orz-ink-faint)" }}>
             {error ?? "未找到该侠客"}
           </p>
@@ -309,7 +309,7 @@ export default function MemberDetailPage() {
 
       <PageTopBar />
 
-      <div className="relative mx-auto max-w-3xl px-5 pt-20 pb-14 sm:px-6 sm:pt-20 sm:pb-16 lg:pt-20 lg:pb-24">
+      <div className="relative mx-auto max-w-6xl px-5 pt-20 pb-14 sm:px-6 sm:pt-20 sm:pb-16 lg:pt-20 lg:pb-24">
         {/* 侠客卡片 */}
         <motion.div
           className="relative overflow-visible rounded-sm border p-6 sm:p-8"

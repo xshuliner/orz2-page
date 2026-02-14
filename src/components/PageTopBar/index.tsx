@@ -11,7 +11,7 @@ type PageTopBarProps = {
 };
 
 const DEFAULT_INNER_CLASS =
-  "flex-1 mx-auto flex max-w-3xl items-center justify-start px-5";
+  "flex-1 mx-auto flex max-w-6xl items-center justify-start px-5";
 
 /**
  * 置顶返回栏：固定顶部、统一样式。左侧内置「← 返回江湖」链接（to="/"），右侧可通过 children 插槽自定义。
