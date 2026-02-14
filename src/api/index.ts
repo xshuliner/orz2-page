@@ -255,7 +255,6 @@ type PostLoginMemberInfoResponse = {
   body?: {
     storyInfo?: StoryItem;
     memberInfo?: MemberInfo;
-    memberUrl?: string;
   } | null;
 };
 
