@@ -19,7 +19,7 @@ const DEFAULT_INNER_CLASS =
 export function PageTopBar({ children, innerClassName }: PageTopBarProps) {
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-10 flex flex-row items-center justify-between w-full border-b py-1"
+      className="fixed top-0 left-0 right-0 z-10 flex flex-row items-center justify-between w-full border-b py-1 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-[max(0.25rem,env(safe-area-inset-top))]"
       style={{
         backgroundColor: "var(--orz-paper)",
         borderColor: "var(--orz-border)",

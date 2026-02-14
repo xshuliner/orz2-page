@@ -30,12 +30,12 @@ export default function Layout() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
       {/* 背景 45° 水印走马灯 */}
-      <div className="pointer-events-none fixed -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-10 flex flex-col justify-around gap-[20vh]">
+      {/* 移动端缩小水印密度与字号，减少性能与视觉干扰 */}
+      <div className="pointer-events-none fixed -rotate-45 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 -z-10 opacity-10 flex flex-col justify-around gap-[15vh] sm:gap-[20vh]">
         {watermarkRows.map((row, rowIndex) => {
           // 偶数行速度递增（正方向），奇数行速度递减（负方向），形成交替效果
           const speedMultiplier = rowIndex % 2 === 0 ? 1 : -1;
           const speed = 40 + rowIndex * 8 * speedMultiplier;
-          
           return (
             <Marquee
               key={rowIndex}
@@ -47,7 +47,7 @@ export default function Layout() {
               className="whitespace-nowrap text-xs font-medium tracking-[0.2em] text-gray-400"
             >
               {row.map((text, index) => (
-                <span key={index} className="mx-10 text-6xl font-display-zh">
+                <span key={index} className="mx-4 text-3xl font-display-zh sm:mx-10 sm:text-6xl">
                   {text}
                 </span>
               ))}

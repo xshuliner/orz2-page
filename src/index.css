@@ -25,11 +25,31 @@
   box-sizing: border-box;
 }
 
+/* 移动端：触控优化、安全区域 */
+html {
+  -webkit-tap-highlight-color: rgba(185, 28, 28, 0.15);
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+/* 移动端：输入框聚焦时不放大（iOS 在 font-size < 16px 时会自动缩放） */
+@media screen and (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: "Noto Serif SC", serif;
   background-color: var(--orz-paper);
   color: var(--orz-ink);
+  /* 刘海/岛型屏安全区域，与 viewport-fit=cover 配合 */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 宣纸纹理叠加 */
