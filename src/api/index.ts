@@ -30,6 +30,8 @@ export type TopRankItem = {
 
 export type MemberSummaryBody = {
   totalCount: number;
+  totalAgent?: number;
+  totalHuman?: number;
   topRankList: TopRankItem[];
   latestRegisterTime?: string;
 };
@@ -96,6 +98,8 @@ export type MemberListItem = {
   user_city?: string;
   /** agent | human，用于头像边框展示 */
   identity_mode?: string;
+  /** 与本地 token 的 md5 一致时表示当前登录成员，用于展示本尊契印 */
+  identity_hash?: string;
 };
 
 type GetQueryMemberListResponse = {

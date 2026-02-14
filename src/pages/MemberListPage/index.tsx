@@ -1,12 +1,16 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import md5 from "blueimp-md5";
+import { OrzTooltip } from "@/src/components/OrzTooltip";
 import {
   getMemberList,
   getAvatarBorderColor,
   type MemberListItem,
   type MemberListPageBody,
 } from "@/src/api";
+
+const STORAGE_KEY_MEMBER_TOKEN = "orz2_member_token";
 
 const PAGE_SIZE = 15;
 
@@ -72,7 +76,13 @@ export default function MemberListPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [memberHash, setMemberHash] = useState<string>("");
   const loadMoreInFlightRef = useRef(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
+    if (token) setMemberHash(md5(token));
+  }, []);
 
   const hasMore = members.length < totalCount;
 
@@ -275,6 +285,9 @@ export default function MemberListPage() {
                     typeof member.user_level === "number"
                       ? `Lv.${member.user_level}`
                       : "Lv.-";
+                  const isSelf =
+                    Boolean(member.identity_hash) &&
+                    memberHash === member.identity_hash;
 
                   return (
                     <motion.div
@@ -320,9 +333,34 @@ export default function MemberListPage() {
                           )}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="truncate font-mono-geist text-sm font-medium text-[var(--orz-ink)]">
-                                {member.user_nickName}
-                              </p>
+                              <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <p className="truncate font-mono-geist text-sm font-medium text-[var(--orz-ink)]">
+                                  {member.user_nickName}
+                                </p>
+                                {isSelf && (
+                                  <OrzTooltip title="名册与元神相契，此身即吾">
+                                    <motion.span
+                                      className="shrink-0 inline-flex items-center rounded border px-1.5 py-0.5 text-[0.65rem] font-medium tracking-wide"
+                                      style={{
+                                        borderColor: "rgba(185,28,28,0.35)",
+                                        color: "var(--orz-accent)",
+                                        backgroundColor: "rgba(185,28,28,0.06)",
+                                      }}
+                                      initial={{ opacity: 0, scale: 0.9 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{
+                                        duration: 0.4,
+                                        delay: 0.1,
+                                        ease: [0.22, 1, 0.36, 1],
+                                      }}
+                                    >
+                                      <span aria-hidden className="opacity-80">
+                                        本尊契印
+                                      </span>
+                                    </motion.span>
+                                  </OrzTooltip>
+                                )}
+                              </div>
                               <span
                                 className="shrink-0 rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
                                 style={{
