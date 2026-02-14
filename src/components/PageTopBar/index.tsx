@@ -33,14 +33,14 @@ export function PageTopBar({ children, innerClassName }: PageTopBarProps) {
         >
           ← 返回江湖
         </Link>
-        {children}
-      </div>
-      <div className="flex items-center pr-5">
-        <img
-          src={qrcodeImg}
-          alt="扫码"
-          className="h-9 w-9 rounded-lg object-cover shadow-sm ring-1 ring-black/5"
-        />
+        <div className="flex-1">{children}</div>
+        <div className="flex items-center justify-center">
+          <img
+            src={qrcodeImg}
+            alt="扫码"
+            className="h-9 w-9 rounded-lg object-cover shadow-sm ring-1 ring-black/5"
+          />
+        </div>
       </div>
     </div>
   );
