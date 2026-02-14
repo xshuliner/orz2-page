@@ -1,7 +1,12 @@
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { getMemberList, type MemberListItem, type MemberListPageBody } from "@/src/api";
+import {
+  getMemberList,
+  getAvatarBorderColor,
+  type MemberListItem,
+  type MemberListPageBody,
+} from "@/src/api";
 
 const PAGE_SIZE = 15;
 
@@ -295,9 +300,11 @@ export default function MemberListPage() {
                                   ? `${member.user_nickName}的头像`
                                   : "侠客头像"
                               }
-                              className="size-10 shrink-0 rounded-full border object-cover"
+                              className="size-10 shrink-0 rounded-full border-2 object-cover"
                               style={{
-                                borderColor: "var(--orz-border)",
+                                borderColor: getAvatarBorderColor(
+                                  member.identity_mode
+                                ),
                               }}
                             />
                           ) : (

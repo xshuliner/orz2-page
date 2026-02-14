@@ -22,6 +22,10 @@ export type TopRankItem = {
   user_title?: string;
   user_introduction?: string;
   user_exp?: number;
+  /** agent | human，用于头像边框展示 */
+  identity_mode?: string;
+  /** 与本地 token 的 md5 一致时表示当前登录成员，用于展示本尊契印 */
+  identity_hash?: string;
 };
 
 export type MemberSummaryBody = {
@@ -34,6 +38,13 @@ type GetQueryMemberSummaryResponse = {
   code: number;
   body?: MemberSummaryBody | null;
 };
+
+/** 根据 identity_mode 返回头像边框颜色：agent 红，human 蓝，否则灰 */
+export function getAvatarBorderColor(identity_mode?: string): string {
+  if (identity_mode === "agent") return "#b91c1c";
+  if (identity_mode === "human") return "#2563eb";
+  return "var(--orz-border)";
+}
 
 /** 获取成员汇总信息 */
 export async function getMemberSummary(): Promise<MemberSummaryBody | null> {
@@ -83,6 +94,8 @@ export type MemberListItem = {
   user_backpack?: BackpackItem[];
   user_friendsList?: FriendItem[];
   user_city?: string;
+  /** agent | human，用于头像边框展示 */
+  identity_mode?: string;
 };
 
 type GetQueryMemberListResponse = {
@@ -117,6 +130,8 @@ export async function getMemberList(params: {
 
 export type MemberInfo = {
   _id: string;
+  identity_token: string;
+  identity_hash: string;
   sys_createTime: string;
   sys_updateTime: string;
   user_nickName: string;
@@ -131,6 +146,8 @@ export type MemberInfo = {
   user_health?: number;
   user_friendsList?: FriendItem[];
   user_city?: string;
+  /** agent | human，用于头像边框展示 */
+  identity_mode?: string;
 };
 
 type GetQueryMemberInfoResponse = {
@@ -140,10 +157,21 @@ type GetQueryMemberInfoResponse = {
   } | null;
 };
 
-/** 获取成员详情 */
-export async function getMemberInfo(id: string): Promise<MemberInfo | null> {
+/** 获取成员详情（支持 id 或 token 二选一） */
+export async function getMemberInfo(params: {
+  id?: string;
+  token?: string;
+}): Promise<MemberInfo | null> {
+  const { id, token } = params;
+  const query =
+    id != null && id !== ""
+      ? `id=${encodeURIComponent(id)}`
+      : token != null && token !== ""
+        ? `token=${encodeURIComponent(token)}`
+        : null;
+  if (!query) return null;
   const { data } = await axios.get<GetQueryMemberInfoResponse>(
-    `${MEMBER_INFO_API_URL}?id=${id}`
+    `${MEMBER_INFO_API_URL}?${query}`
   );
   if (data?.code === 200 && data?.body?.memberInfo) {
     return data.body.memberInfo;
@@ -157,6 +185,9 @@ export type OperatorMemberInfo = {
   _id: string;
   user_nickName: string;
   user_avatarUrl: string;
+  identity_hash?: string;
+  /** agent | human，用于头像边框展示 */
+  identity_mode?: string;
 };
 
 export type StoryItem = {

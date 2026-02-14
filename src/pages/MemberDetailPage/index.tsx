@@ -2,11 +2,13 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
+import md5 from "blueimp-md5";
 import { OrzTooltip } from "@/src/components/OrzTooltip";
 import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
 import {
   getMemberInfo,
   getStoryList,
+  getAvatarBorderColor,
   type MemberInfo,
   type StoryItem,
 } from "@/src/api";
@@ -34,6 +36,7 @@ const formatTime = (isoStr: string) => {
 };
 
 const STORY_PAGE_SIZE = 15;
+const STORAGE_KEY_MEMBER_TOKEN = "orz2_member_token";
 
 const formatStoryTime = (isoStr: string) => {
   const d = dayjs(isoStr);
@@ -74,6 +77,7 @@ export default function MemberDetailPage() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const [member, setMember] = useState<MemberInfo | null>(null);
+  const [memberHash, setMemberHash] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,25 +94,47 @@ export default function MemberDetailPage() {
   const storyScrollToFirstNewRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setError("未指定侠客");
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
-    getMemberInfo(id)
-      .then((info: MemberInfo | null) => {
+    const loadMember = async () => {
+      const memberToken = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
+      if (memberToken) {
+        setMemberHash(md5(memberToken));
+      }
+
+      if (id) {
+        const info = await getMemberInfo({ id });
         if (!cancelled) {
           setMember(info);
           setError(info ? null : "未找到该侠客");
         }
-      })
-      .catch(() => {
-        if (!cancelled) setError("加载失败");
-      })
-      .finally(() => {
         if (!cancelled) setLoading(false);
-      });
+        return;
+      }
+
+      if (!memberToken) {
+        if (!cancelled) {
+          setError("未找到侠客");
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const info = await getMemberInfo({ token: memberToken });
+        if (!info) {
+          localStorage.removeItem(STORAGE_KEY_MEMBER_TOKEN);
+        }
+        if (!cancelled) {
+          setMember(info ?? null);
+          setError(info ? null : "未找到侠客");
+        }
+      } catch {
+        if (!cancelled) setError("未找到侠客");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadMember();
     return () => {
       cancelled = true;
     };
@@ -242,6 +268,11 @@ export default function MemberDetailPage() {
     );
   }
 
+  const isSelf =
+    Boolean(memberHash) &&
+    Boolean(member.identity_hash) &&
+    memberHash === member.identity_hash;
+
   return (
     <div className="relative min-h-screen overflow-x-clip antialiased">
       {/* 水墨渐变背景 */}
@@ -321,12 +352,39 @@ export default function MemberDetailPage() {
                   : "侠客头像"
               }
               className="size-20 shrink-0 rounded-full border-2 object-cover"
-              style={{ borderColor: "var(--orz-border-strong)" }}
+              style={{
+                borderColor: getAvatarBorderColor(member.identity_mode),
+              }}
             />
             <div className="min-w-0 flex-1 text-center sm:text-left">
-              <h1 className="font-display-zh text-2xl font-semibold text-[var(--orz-ink)] sm:text-[1.75rem]">
-                {member.user_nickName}
-              </h1>
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <h1 className="font-display-zh text-2xl font-semibold text-[var(--orz-ink)] sm:text-[1.75rem]">
+                  {member.user_nickName}
+                </h1>
+                {isSelf && (
+                  <OrzTooltip title="名册与元神相契，此身即吾">
+                    <motion.span
+                      className="inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-medium tracking-wide"
+                      style={{
+                        borderColor: "rgba(185,28,28,0.35)",
+                        color: "var(--orz-accent)",
+                        backgroundColor: "rgba(185,28,28,0.06)",
+                      }}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: 0.3,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                    >
+                      <span aria-hidden className="opacity-80">
+                        本尊契印
+                      </span>
+                    </motion.span>
+                  </OrzTooltip>
+                )}
+              </div>
               {member.user_personality && (
                 <p
                   className="mt-1 text-sm"
@@ -724,33 +782,39 @@ function MemberStoryLogSection({
                               ? `${operator.user_nickName}的头像`
                               : "侠客头像"
                           }
-                          className="size-4 rounded-full object-cover"
+                          className="size-4 rounded-full border object-cover"
+                          style={{
+                            borderColor: getAvatarBorderColor(
+                              operator?.identity_mode
+                            ),
+                          }}
                         />
                       ) : null}
                       <span>{operator?.user_nickName ?? "侠客"}</span>
                     </Link>
-                    {storyTypeLabel && (
-                      <span
-                        className="inline-flex items-center rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
-                        style={{
-                          borderColor: "rgba(185,28,28,0.22)",
-                          backgroundColor: "rgba(185,28,28,0.04)",
-                          color: "var(--orz-accent)",
-                        }}
-                      >
-                        {storyTypeLabel}
-                      </span>
-                    )}
                   </div>
                 )}
 
-                {/* 第三行：故事正文 */}
-                <p
-                  className="text-sm leading-relaxed text-[var(--orz-ink)]"
-                  dangerouslySetInnerHTML={{
-                    __html: formatLog(item.content),
-                  }}
-                />
+                {/* 第三行：故事正文（类型标签嵌入段首） */}
+                <p className="text-sm leading-relaxed text-[var(--orz-ink)]">
+                  {storyTypeLabel && (
+                    <span
+                      className="align-text-bottom mr-1.5 inline-flex items-center rounded-full border px-1.5 py-0 font-mono-geist text-[0.65rem] leading-relaxed"
+                      style={{
+                        borderColor: "rgba(185,28,28,0.22)",
+                        backgroundColor: "rgba(185,28,28,0.04)",
+                        color: "var(--orz-accent)",
+                      }}
+                    >
+                      {storyTypeLabel}
+                    </span>
+                  )}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: formatLog(item.content),
+                    }}
+                  />
+                </p>
               </motion.li>
             );
           })}

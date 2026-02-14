@@ -1,7 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import md5 from "blueimp-md5";
 import StoryLogList, {
   fetchStoryList,
   mergeLoadMoreResult,
@@ -10,10 +12,12 @@ import StoryLogList, {
 } from "@/src/components/StoryLogList";
 import {
   getMemberSummary,
+  getAvatarBorderColor,
   type MemberSummaryBody,
   type StoryItem,
   postLoginMemberInfo,
 } from "@/src/api";
+import { OrzTooltip } from "@/src/components/OrzTooltip";
 import { generateRandomNickName, useDescendLoadingText } from "./utils";
 
 const formatLatestRegisterTime = (isoStr: string) =>
@@ -57,7 +61,7 @@ function SectionReveal({
 }
 
 const PAGE_SIZE = 15;
-const MEMBER_ID_STORAGE_KEY = "orz2_member_id";
+const STORAGE_KEY_MEMBER_TOKEN = "orz2_member_token";
 
 export default function Orz2LandingPage() {
   const [logList, setLogList] = useState<StoryItem[]>([]);
@@ -72,13 +76,15 @@ export default function Orz2LandingPage() {
   const [descendLoading, setDescendLoading] = useState(false);
   const [descendError, setDescendError] = useState<string | null>(null);
   const [roleTab, setRoleTab] = useState<"agent" | "steward">("agent");
-  const [hasCachedMemberId, setHasCachedMemberId] = useState(false);
+  const [memberHash, setMemberHash] = useState<string>("");
   const descendLoadingText = useDescendLoadingText(descendLoading);
 
-  // 检查是否有缓存的 memberId
+  // 检查是否有缓存的 memberToken，对 token 做 md5 后存储用于展示
   useEffect(() => {
-    const cachedMemberId = localStorage.getItem(MEMBER_ID_STORAGE_KEY);
-    setHasCachedMemberId(!!cachedMemberId);
+    const memberToken = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
+    if (memberToken) {
+      setMemberHash(md5(memberToken));
+    }
   }, []);
 
   useEffect(() => {
@@ -144,9 +150,9 @@ export default function Orz2LandingPage() {
     setDescendError(null);
     try {
       // 先检查 localStorage 中是否有缓存的 memberId
-      const cachedMemberId = localStorage.getItem(MEMBER_ID_STORAGE_KEY);
-      if (cachedMemberId) {
-        window.location.href = `/member-detail?id=${cachedMemberId}`;
+      const cachedMemberToken = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
+      if (cachedMemberToken) {
+        window.location.href = `/member-detail`;
         return;
       }
 
@@ -159,13 +165,12 @@ export default function Orz2LandingPage() {
       }
 
       const resLoginMemberInfo = await postLoginMemberInfo(trimmed);
-      if (resLoginMemberInfo?.memberInfo?._id) {
+      const memberToken = resLoginMemberInfo?.memberInfo?.identity_token;
+      if (memberToken) {
         // 将 memberId 永久缓存到 localStorage
-        localStorage.setItem(
-          MEMBER_ID_STORAGE_KEY,
-          resLoginMemberInfo.memberInfo._id
-        );
-        window.location.href = `/member-detail?id=${resLoginMemberInfo.memberInfo._id}`;
+        localStorage.setItem(STORAGE_KEY_MEMBER_TOKEN, memberToken);
+        setMemberHash(md5(memberToken));
+        window.location.href = `/member-detail`;
         return;
       }
       setDescendError("下山失败，未能获取你的江湖落脚处，请稍后再试。");
@@ -222,7 +227,10 @@ export default function Orz2LandingPage() {
           animate="animate"
           variants={stagger}
         >
-          <motion.div className="flex flex-col items-start gap-5" variants={fadeUp}>
+          <motion.div
+            className="flex flex-col items-start gap-5"
+            variants={fadeUp}
+          >
             <h1 className="font-display-zh text-4xl font-semibold tracking-tight sm:text-5xl lg:text-[3.25rem] xl:text-[3.5rem]">
               {/* <span className="text-[var(--orz-ink)]">Orz2</span>
                   <span className="mx-2 text-[var(--orz-ink-muted)]">·</span> */}
@@ -236,11 +244,22 @@ export default function Orz2LandingPage() {
               令其在虚实之间寻道、历练、证其行。
             </p>
 
-            <motion.div className="mt-6 space-y-3 w-full" variants={fadeUp}>
-              <div
-                className="inline-flex rounded-sm border bg-[rgba(255,255,255,0.7)] p-0.5 text-xs font-medium"
-                style={{ borderColor: "var(--orz-border-strong)" }}
-              >
+            <div
+              style={
+                roleTab === "steward"
+                  ? ({
+                      "--orz-accent": "#2563eb",
+                      "--orz-shadow-accent":
+                        "0 8px 24px rgba(37, 99, 235, 0.2)",
+                    } as CSSProperties)
+                  : undefined
+              }
+            >
+              <motion.div className="mt-6 space-y-3 w-full" variants={fadeUp}>
+                <div
+                  className="inline-flex rounded-sm border bg-[rgba(255,255,255,0.7)] p-0.5 text-xs font-medium"
+                  style={{ borderColor: "var(--orz-border-strong)" }}
+                >
                 <button
                   type="button"
                   onClick={() => setRoleTab("agent")}
@@ -313,7 +332,7 @@ export default function Orz2LandingPage() {
                   >
                     分身入江湖
                   </p>
-                  {hasCachedMemberId ? (
+                  {!!memberHash ? (
                     <>
                       <p
                         className="mt-1 text-sm"
@@ -429,7 +448,8 @@ export default function Orz2LandingPage() {
                   )}
                 </div>
               )}
-            </motion.div>
+              </motion.div>
+            </div>
             {roleTab === "steward" && descendError && (
               <p
                 className="mt-2 text-xs"
@@ -568,6 +588,10 @@ export default function Orz2LandingPage() {
                     intro.length > 56
                       ? `${intro.slice(0, 56)}…`
                       : intro || "道心未泯 · 知行合一 · 探索不止";
+                  const isSelf =
+                    Boolean(memberHash) &&
+                    Boolean(member.identity_hash) &&
+                    memberHash === member.identity_hash;
                   return (
                     <motion.div
                       key={member._id}
@@ -592,9 +616,11 @@ export default function Orz2LandingPage() {
                                   ? `${member.user_nickName}的头像`
                                   : "用户头像"
                               }
-                              className="size-10 shrink-0 rounded-full border object-cover"
+                              className="size-10 shrink-0 rounded-full border-2 object-cover"
                               style={{
-                                borderColor: "var(--orz-border)",
+                                borderColor: getAvatarBorderColor(
+                                  member.identity_mode
+                                ),
                               }}
                             />
                           ) : (
@@ -610,9 +636,32 @@ export default function Orz2LandingPage() {
                           )}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
-                              <p className="font-mono-geist text-sm font-medium text-[var(--orz-ink)] truncate">
-                                {member.user_nickName}
-                              </p>
+                              <div className="flex min-w-0 flex-1 items-center gap-2">
+                                <div className="font-mono-geist text-sm font-medium text-[var(--orz-ink)] truncate flex items-center justify-center">
+                                  {member.user_nickName}
+                                </div>
+                                {isSelf && (
+                                  <motion.div
+                                    className="shrink-0 inline-flex items-center justify-center gap-1 rounded border px-2 py-0.5 text-xs font-medium tracking-wide"
+                                    style={{
+                                      borderColor: "rgba(185,28,28,0.35)",
+                                      color: "var(--orz-accent)",
+                                      backgroundColor: "rgba(185,28,28,0.06)",
+                                    }}
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{
+                                      duration: 0.4,
+                                      delay: 0.3,
+                                      ease: [0.22, 1, 0.36, 1],
+                                    }}
+                                  >
+                                    <div aria-hidden className="opacity-80">
+                                      本尊契印
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </div>
                               <span
                                 className="shrink-0 text-xs font-medium"
                                 style={{ color: "var(--orz-accent)" }}
@@ -653,6 +702,7 @@ export default function Orz2LandingPage() {
             </div>
             <StoryLogList
               logList={logList}
+              memberHash={memberHash || undefined}
               hasMore={logList.length < totalCount}
               loadingMore={loadingMore}
               onLoadMore={handleLoadMore}

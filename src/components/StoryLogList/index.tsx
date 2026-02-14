@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
+import { OrzTooltip } from "@/src/components/OrzTooltip";
 import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
 import {
   getStoryList,
+  getAvatarBorderColor,
   type StoryItem,
   type StoryListResult,
 } from "@/src/api";
@@ -86,6 +88,8 @@ export type StoryLogListProps =
       /** 传入列表时直接展示，适用于首页等 */
       logList: StoryItem[];
       memberId?: never;
+      /** 当前登录侠客的 identity hash，与 operator.identity_hash 一致时显示本尊契印 */
+      memberHash?: string;
       /** 是否还有更多 */
       hasMore?: boolean;
       /** 加载更多中 */
@@ -163,6 +167,7 @@ export default function StoryLogList(props: StoryLogListProps) {
 
   // logList 模式下的分页 props（需类型收窄）
   type LogListProps = {
+    memberHash?: string;
     hasMore?: boolean;
     loadingMore?: boolean;
     onLoadMore?: () => void;
@@ -176,6 +181,9 @@ export default function StoryLogList(props: StoryLogListProps) {
   const onLoadMoreProp = isLogListMode
     ? (props as LogListProps).onLoadMore
     : undefined;
+  const memberHash = isLogListMode
+    ? (props as LogListProps).memberHash ?? ""
+    : "";
 
   // memberId 模式：加载更多（触底时 pageNum+1，去重后插到后面）
   const loadMoreMemberStories = useCallback(async () => {
@@ -329,7 +337,7 @@ export default function StoryLogList(props: StoryLogListProps) {
 
                 {/* 第二行：头像 + 昵称 + Tag */}
                 {memberId && (
-                  <div className="flex items-center gap-x-2">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <Link
                       to={`/member-detail?id=${memberId}`}
                       className="inline-flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 text-xs font-bold transition-colors hover:underline"
@@ -345,33 +353,64 @@ export default function StoryLogList(props: StoryLogListProps) {
                               ? `${operator.user_nickName}的头像`
                               : "侠客头像"
                           }
-                          className="size-4 rounded-full object-cover"
+                          className="size-4 rounded-full border object-cover"
+                          style={{
+                            borderColor: getAvatarBorderColor(
+                              operator?.identity_mode
+                            ),
+                          }}
                         />
                       ) : null}
                       <span>{operator?.user_nickName ?? "侠客"}</span>
                     </Link>
-                    {storyTypeLabel && (
-                      <span
-                        className="inline-flex items-center rounded-full border px-1.5 py-0.5 font-mono-geist text-[0.65rem]"
-                        style={{
-                          borderColor: "rgba(185,28,28,0.22)",
-                          backgroundColor: "rgba(185,28,28,0.04)",
-                          color: "var(--orz-accent)",
-                        }}
-                      >
-                        {storyTypeLabel}
-                      </span>
-                    )}
+                    {memberHash &&
+                      operator?.identity_hash &&
+                      memberHash === operator.identity_hash && (
+                        <OrzTooltip title="名册与元神相契，此身即吾">
+                          <motion.span
+                            className="inline-flex items-center gap-1 rounded border px-2 py-0.5 text-xs font-medium tracking-wide"
+                            style={{
+                              borderColor: "rgba(185,28,28,0.35)",
+                              color: "var(--orz-accent)",
+                              backgroundColor: "rgba(185,28,28,0.06)",
+                            }}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{
+                              duration: 0.4,
+                              delay: 0.15,
+                              ease: [0.22, 1, 0.36, 1],
+                            }}
+                          >
+                            <span aria-hidden className="opacity-80">
+                              本尊契印
+                            </span>
+                          </motion.span>
+                        </OrzTooltip>
+                      )}
                   </div>
                 )}
 
-                {/* 第三行：故事正文 */}
-                <p
-                  className="text-sm leading-relaxed text-[var(--orz-ink)]"
-                  dangerouslySetInnerHTML={{
-                    __html: formatLog(item.content),
-                  }}
-                />
+                {/* 第三行：故事正文（类型标签嵌入段首） */}
+                <p className="text-sm leading-relaxed text-[var(--orz-ink)]">
+                  {storyTypeLabel && (
+                    <span
+                      className="align-text-bottom mr-1.5 inline-flex items-center rounded-full border px-1.5 py-0 font-mono-geist text-[0.65rem] leading-relaxed"
+                      style={{
+                        borderColor: "rgba(185,28,28,0.22)",
+                        backgroundColor: "rgba(185,28,28,0.04)",
+                        color: "var(--orz-accent)",
+                      }}
+                    >
+                      {storyTypeLabel}
+                    </span>
+                  )}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: formatLog(item.content),
+                    }}
+                  />
+                </p>
               </motion.li>
             );
           })}
