@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import md5 from "blueimp-md5";
 import { OrzTooltip } from "@/src/components/OrzTooltip";
+import { PageTopBar } from "@/src/components/PageTopBar";
 import { getStoryTypeLabel } from "@/src/components/storyTypeMeta";
 import {
   getMemberInfo,
@@ -241,24 +242,7 @@ export default function MemberDetailPage() {
           }}
         />
         <div className="grain-overlay" />
-        {/* 置顶返回栏 */}
-        <div
-          className="fixed top-0 left-0 right-0 z-10 w-full border-b py-4"
-          style={{
-            backgroundColor: "var(--orz-paper)",
-            borderColor: "var(--orz-border)",
-          }}
-        >
-          <div className="mx-auto max-w-3xl px-5">
-            <Link
-              to="/"
-              className="inline-flex items-center text-sm font-medium transition-colors hover:underline"
-              style={{ color: "var(--orz-accent)" }}
-            >
-              ← 返回江湖
-            </Link>
-          </div>
-        </div>
+        <PageTopBar />
         <div className="relative mx-auto max-w-3xl px-5 pt-16 pb-20 text-center">
           <p className="mb-6" style={{ color: "var(--orz-ink-faint)" }}>
             {error ?? "未找到该侠客"}
@@ -305,26 +289,7 @@ export default function MemberDetailPage() {
         }}
       />
 
-      {/* 置顶返回栏 */}
-      <div
-        className="fixed top-0 left-0 right-0 z-10 w-full border-b py-4"
-        style={{
-          backgroundColor: "var(--orz-paper)",
-          borderColor: "var(--orz-border)",
-        }}
-      >
-        <div className="mx-auto max-w-3xl px-5 sm:px-6">
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:underline"
-              style={{ color: "var(--orz-accent)" }}
-            >
-              ← 返回江湖
-            </Link>
-          </motion.div>
-        </div>
-      </div>
+      <PageTopBar />
 
       <div className="relative mx-auto max-w-3xl px-5 pt-20 pb-14 sm:px-6 sm:pt-20 sm:pb-16 lg:pt-20 lg:pb-24">
         {/* 侠客卡片 */}

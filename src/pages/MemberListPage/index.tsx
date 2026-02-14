@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import md5 from "blueimp-md5";
 import { OrzTooltip } from "@/src/components/OrzTooltip";
+import { PageTopBar } from "@/src/components/PageTopBar";
 import {
   getMemberList,
   getAvatarBorderColor,
@@ -89,7 +90,7 @@ export default function MemberListPage() {
   const fetchPage = useCallback(
     async (page: number): Promise<MemberListPageBody> =>
       getMemberList({ pageNum: page, pageSize: PAGE_SIZE }),
-    [],
+    []
   );
 
   useEffect(() => {
@@ -185,30 +186,7 @@ export default function MemberListPage() {
         }}
       />
 
-      {/* 置顶返回栏 */}
-      <div
-        className="fixed top-0 left-0 right-0 z-10 w-full border-b py-4"
-        style={{
-          backgroundColor: "var(--orz-paper)",
-          borderColor: "var(--orz-border)",
-        }}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 sm:px-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1 text-sm font-medium transition-colors hover:underline"
-            style={{ color: "var(--orz-accent)" }}
-          >
-            ← 返回江湖
-          </Link>
-          <span
-            className="hidden text-xs sm:inline-flex"
-            style={{ color: "var(--orz-ink-faint)" }}
-          >
-            江湖名册 · 共 {totalCount || "—"} 位
-          </span>
-        </div>
-      </div>
+      <PageTopBar />
 
       <div className="relative mx-auto max-w-6xl px-5 pt-20 pb-14 sm:px-6 sm:pt-20 sm:pb-16 lg:pt-20 lg:pb-24">
         {/* 标题区域 */}
@@ -222,7 +200,7 @@ export default function MemberListPage() {
             className="text-xs font-medium tracking-[0.4em]"
             style={{ color: "var(--orz-ink-faint)" }}
           >
-            名册在录
+            名册在录 · 共 {totalCount || "—"} 位
           </p>
           <h1 className="mt-3 font-display-zh text-2xl font-semibold text-[var(--orz-ink)] sm:text-[1.8rem]">
             江湖名册
@@ -456,4 +434,3 @@ export default function MemberListPage() {
     </div>
   );
 }
-
