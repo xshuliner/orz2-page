@@ -77,6 +77,7 @@ function getFriendlinessMeta(value: number): {
 export default function MemberDetailPage() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
+  const tokenFromParams = searchParams.get("token");
   const [member, setMember] = useState<MemberInfo | null>(null);
   const [memberHash, setMemberHash] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -96,50 +97,67 @@ export default function MemberDetailPage() {
 
   useEffect(() => {
     let cancelled = false;
+
+    const applyResult = (info: MemberInfo | null, notFoundMsg: string) => {
+      if (cancelled) return;
+      setMember(info ?? null);
+      setError(info ? null : notFoundMsg);
+    };
+
+    const persistTokenAndApply = (info: MemberInfo, token: string) => {
+      if (cancelled) return;
+      localStorage.setItem(STORAGE_KEY_MEMBER_TOKEN, token);
+      setMemberHash(md5(token));
+      setMember(info);
+      setError(null);
+    };
+
     const loadMember = async () => {
-      const memberToken = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
-      if (memberToken) {
-        setMemberHash(md5(memberToken));
-      }
-
-      if (id) {
-        const info = await getMemberInfo({ id });
-        if (!cancelled) {
-          setMember(info);
-          setError(info ? null : "未找到该侠客");
-        }
-        if (!cancelled) setLoading(false);
-        return;
-      }
-
-      if (!memberToken) {
-        if (!cancelled) {
-          setError("未找到侠客");
-          setLoading(false);
-        }
-        return;
-      }
-
       try {
-        const info = await getMemberInfo({ token: memberToken });
-        if (!info) {
-          localStorage.removeItem(STORAGE_KEY_MEMBER_TOKEN);
+        // 优先处理 URL 传入的 token：若能用其查到侠客则写入缓存并渲染
+        if (tokenFromParams) {
+          try {
+            const info = await getMemberInfo({ token: tokenFromParams });
+            if (info) {
+              persistTokenAndApply(info, tokenFromParams);
+              return;
+            }
+          } catch {
+            // 用 URL token 未查到侠客，继续走原有逻辑
+          }
         }
-        if (!cancelled) {
-          setMember(info ?? null);
-          setError(info ? null : "未找到侠客");
+
+        const memberToken = localStorage.getItem(STORAGE_KEY_MEMBER_TOKEN);
+        if (memberToken) setMemberHash(md5(memberToken));
+
+        if (id) {
+          const info = await getMemberInfo({ id });
+          applyResult(info ?? null, "未找到该侠客");
+          return;
         }
-      } catch {
-        if (!cancelled) setError("未找到侠客");
+
+        if (!memberToken) {
+          applyResult(null, "未找到侠客");
+          return;
+        }
+
+        try {
+          const info = await getMemberInfo({ token: memberToken });
+          if (!info) localStorage.removeItem(STORAGE_KEY_MEMBER_TOKEN);
+          applyResult(info ?? null, "未找到侠客");
+        } catch {
+          applyResult(null, "未找到侠客");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
+
     loadMember();
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [id, tokenFromParams]);
 
   // 江湖纪事：初始加载
   useEffect(() => {
