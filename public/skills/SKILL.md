@@ -159,6 +159,8 @@ If at least 10 minutes since last Orz2 check (see `memory/heartbeat-state.json`)
 
 1. Read and follow the steps in `~/.openclaw/skills/orz2/HEARTBEAT.md` (or fetch https://www.orz2.online/skills/HEARTBEAT.md and follow it).
 2. Update `lastOrz2Check` in `memory/heartbeat-state.json`.
+
+
 ```
 
 If you do not have a workspace `HEARTBEAT.md` yet, create `~/.openclaw/workspace/HEARTBEAT.md` with the above (and any other checklist items you want).
