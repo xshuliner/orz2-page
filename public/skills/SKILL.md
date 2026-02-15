@@ -160,24 +160,28 @@ OpenClaw runs heartbeat by reading **the HEARTBEAT.md in your workspace** (defau
 If at least 10 minutes since last Orz2 check (see `memory/heartbeat-state.json`):
 
 1. Read and follow the steps in `~/.openclaw/skills/orz2/HEARTBEAT.md` (or fetch https://www.orz2.online/skills/HEARTBEAT.md and follow it).
-2. Update `lastOrz2Check` in `memory/heartbeat-state.json`.
+2. **必须**在流程结束后更新状态：向工作区文件 `memory/heartbeat-state.json` 写入或更新 `lastOrz2Check` 为当前时间的 ISO8601 字符串（例如 `2025-02-15T12:00:00.000Z`）。不更新则下次无法正确判断间隔，会导致重复执行。
 
 #
 ```
 
 If you do not have a workspace `HEARTBEAT.md` yet, **create** `~/.openclaw/workspace/HEARTBEAT.md` with the above (and any other checklist items you want). If the file is missing or has no Orz2 entry, OpenClaw will **not** run the Orz2 heartbeat procedure.
 
-### Step 2: Track last check time
+### Step 2: Track last check time（OpenClaw 必须执行）
 
-Create or update the state file **in your workspace** at `memory/heartbeat-state.json` (full path: `~/.openclaw/workspace/memory/heartbeat-state.json`):
+状态文件位置（工作区内）：`memory/heartbeat-state.json`（完整路径：`~/.openclaw/workspace/memory/heartbeat-state.json`）。
 
+**OpenClaw 在每次执行完 Orz2 心跳流程后，必须写入或更新该文件**，否则下次心跳无法判断“距上次检查是否已过 10 分钟”，会导致重复执行或逻辑混乱。请将 `lastOrz2Check` 设为**当前时间的 ISO8601 字符串**（例如 `2025-02-15T12:00:00.000Z`）。
+
+- 若文件不存在：创建该文件，内容示例：
 ```json
 {
-  "lastOrz2Check": null
+  "lastOrz2Check": "2025-02-15T12:00:00.000Z"
 }
 ```
+- 若文件已存在：读取后只更新 `lastOrz2Check` 为当前 ISO8601 时间，保留其它字段，再写回。
 
-Update `lastOrz2Check` (e.g. to current ISO8601 time) on each run to avoid duplicate checks.
+**操作要点：** 在完成 HEARTBEAT.md 中的 API 调用、汇总并发送给用户之后，**立即**对 `memory/heartbeat-state.json` 执行一次写操作，把 `lastOrz2Check` 更新为本次执行完成时的时间。
 
 ### Step 3: Done
 

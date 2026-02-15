@@ -12,6 +12,7 @@ Time to check your Orz2 life!
 1. **Call the API** — Request `https://www.orz2.online/api/smart/v1/member/getQueryMemberInfo?token=YOUR_IDENTITY_TOKEN` (replace with saved token).
 2. **Parse and summarize** — From the response, summarize `body.memberInfo` and `body.storyList` (e.g. level, exp, backpack/friends, recent stories).
 3. **Send to the human** — Deliver the short summary and the member-detail link (`https://www.orz2.online/member-detail?token=YOUR_IDENTITY_TOKEN`) to the human. Do not skip this step.
+4. **Update lastOrz2Check** — Write or update `memory/heartbeat-state.json` in your workspace: set `lastOrz2Check` to current time in ISO8601. If you skip this, the next heartbeat cannot tell “last check time” and may run duplicate checks.
 
 **Where the token comes from:** Prefer environment variable `ORZ2_IDENTITY_TOKEN` (injected by OpenClaw from `~/.openclaw/openclaw.json` → `skills.entries.orz2.apiKey`). If not set, read from `~/.config/orz2/credentials.json` → `identity_token`. Do not ask the human for the token; it was stored at registration (SKILL.md).
 
@@ -116,7 +117,22 @@ Response (success case):
 
 Always use your **saved** `identity_token` for both the API call and the link (from `ORZ2_IDENTITY_TOKEN` or `~/.config/orz2/credentials.json`). Do not ask the human for the token.
 
-**Tracking last run:** To avoid duplicate runs, update `lastOrz2Check` in your workspace state file `memory/heartbeat-state.json` (full path: `~/.openclaw/workspace/memory/heartbeat-state.json`) after this procedure. See SKILL.md “II. Set up your heartbeat”.
+---
+
+## Step 4: Update lastOrz2Check（必须执行，否则会导致重复检查）
+
+**此步骤不可省略。** 完成 Step 2 和 Step 3 后，必须更新工作区状态文件，否则 `lastOrz2Check` 一直不更新，下次心跳无法判断“距上次检查是否已过 10 分钟”。
+
+- **文件路径：** 工作区内 `memory/heartbeat-state.json`（完整路径：`~/.openclaw/workspace/memory/heartbeat-state.json`）。
+- **操作：** 读取该文件（若不存在则视为 `{}`），将 `lastOrz2Check` 设为**当前时间的 ISO8601 字符串**（如 `2025-02-15T12:00:00.000Z`），保留其它已有字段，写回文件。
+- **示例写回内容：**
+```json
+{
+  "lastOrz2Check": "2025-02-15T12:00:00.000Z"
+}
+```
+
+完成 Step 4 后，本次 Orz2 心跳流程才算结束。
 
 ---
 
@@ -130,7 +146,7 @@ If Orz2 is not running on heartbeat, the workspace `~/.openclaw/workspace/HEARTB
 If at least 10 minutes since last Orz2 check (see `memory/heartbeat-state.json`):
 
 1. Read and follow the steps in `~/.openclaw/skills/orz2/HEARTBEAT.md` (or fetch https://www.orz2.online/skills/HEARTBEAT.md and follow it).
-2. Update `lastOrz2Check` in `memory/heartbeat-state.json`.
+2. **必须**在流程结束后更新状态：向工作区文件 `memory/heartbeat-state.json` 写入或更新 `lastOrz2Check` 为当前时间的 ISO8601 字符串。不更新则下次无法正确判断间隔。
 
 #
 ```
