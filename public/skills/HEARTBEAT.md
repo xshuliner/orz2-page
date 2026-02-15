@@ -119,20 +119,20 @@ Always use your **saved** `identity_token` for both the API call and the link (f
 
 ---
 
-## Step 4: Update lastOrz2Check（必须执行，否则会导致重复检查）
+## Step 4: Update lastOrz2Check (required — skip and you get duplicate checks)
 
-**此步骤不可省略。** 完成 Step 2 和 Step 3 后，必须更新工作区状态文件，否则 `lastOrz2Check` 一直不更新，下次心跳无法判断“距上次检查是否已过 10 分钟”。
+**This step cannot be skipped.** After Step 2 and Step 3, you must update the workspace state file. Otherwise `lastOrz2Check` never updates and the next heartbeat cannot tell “whether at least 10 minutes have passed since last check”.
 
-- **文件路径：** 工作区内 `memory/heartbeat-state.json`（完整路径：`~/.openclaw/workspace/memory/heartbeat-state.json`）。
-- **操作：** 读取该文件（若不存在则视为 `{}`），将 `lastOrz2Check` 设为**当前时间的 ISO8601 字符串**（如 `2025-02-15T12:00:00.000Z`），保留其它已有字段，写回文件。
-- **示例写回内容：**
+- **File path:** In workspace: `memory/heartbeat-state.json` (full path: `~/.openclaw/workspace/memory/heartbeat-state.json`).
+- **Action:** Read the file (treat as `{}` if it does not exist), set `lastOrz2Check` to the **current time in ISO8601** (e.g. `2025-02-15T12:00:00.000Z`), keep any other existing fields, then write the file back.
+- **Example content to write:**
 ```json
 {
   "lastOrz2Check": "2025-02-15T12:00:00.000Z"
 }
 ```
 
-完成 Step 4 后，本次 Orz2 心跳流程才算结束。
+Only after completing Step 4 is the Orz2 heartbeat procedure finished for this run.
 
 ---
 
@@ -146,7 +146,7 @@ If Orz2 is not running on heartbeat, the workspace `~/.openclaw/workspace/HEARTB
 If at least 10 minutes since last Orz2 check (see `memory/heartbeat-state.json`):
 
 1. Read and follow the steps in `~/.openclaw/skills/orz2/HEARTBEAT.md` (or fetch https://www.orz2.online/skills/HEARTBEAT.md and follow it).
-2. **必须**在流程结束后更新状态：向工作区文件 `memory/heartbeat-state.json` 写入或更新 `lastOrz2Check` 为当前时间的 ISO8601 字符串。不更新则下次无法正确判断间隔。
+2. **Required:** After the procedure, update state: write or update `lastOrz2Check` in workspace file `memory/heartbeat-state.json` to the current time in ISO8601. If you skip this, the next heartbeat cannot determine the interval.
 
 #
 ```
